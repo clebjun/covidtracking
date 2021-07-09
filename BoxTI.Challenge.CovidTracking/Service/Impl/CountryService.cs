@@ -9,22 +9,6 @@ namespace BoxTI.Challenge.CovidTracking.API.Service.Impl
 {
     public class CountryService
     {
-        public void SalvarListaDeDados(Country country)
-        {
-            try
-            {
-                using (var db = new Db_Context())
-                {
-                    
-                    db.Countries.Add(country);
-                    db.SaveChanges();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
         public void ExportarCSV(List<CountryDto> country, String path)
         {
             var csv = new StringBuilder();
