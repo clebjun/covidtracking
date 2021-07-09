@@ -77,4 +77,5 @@ C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking
 C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking\obj\Debug\netcoreapp3.1\BoxTI.Challenge.CovidTracking.API.MvcApplicationPartsAssemblyInfo.cs
 C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking\bin\Debug\netcoreapp3.1\AutoMapper.dll
 C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking\bin\Debug\netcoreapp3.1\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
-C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking\obj\Debug\netcoreapp3.1\BoxTI.Challenge.CovidTracking.API.csprojAssemblyReference.cache
+C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\git\CovidTracking\BoxTI.Challenge.CovidTracking\BoxTI.Challenge.CovidTracking\bin\Debug\netcoreapp3.1\libman.json

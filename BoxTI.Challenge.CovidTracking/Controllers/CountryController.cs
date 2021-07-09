@@ -11,10 +11,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AutoMapper;
-using System.Data.Entity;
+using BoxTI.Challenge.CovidTracking.API.Service.Impl;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BoxTI.Challenge.CovidTracking.API.Controllers
 {
+    [Authorize]
     public class CountryController : Controller
     {
         private readonly Db_Context _ctt;
@@ -27,24 +29,16 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
             _map = mapper;
         }
 
-        [HttpGet("DadosCovidPais")]
-        public async Task<CountryDto> DadosCovidPais([Required] string countryName)
+        [HttpGet("NumeroCovidPorPais")]
+        public async Task<CountryDto> NumeroCovidPorPais([Required] string countryName)
         {
             CountryDto Country = new CountryDto();
             string Uri;
 
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                HttpRequestMessage request = new HttpRequestMessage();
-
-                Uri = BaseUrl + "/" + countryName;
-                request.RequestUri = new Uri(Uri);
-                request.Method = HttpMethod.Get;
-                request.Headers.Add("x-rapidapi-key", "27a8a51e73mshb56ce7441cf679cp1cc3b1jsn492bbef14582");
-                request.Headers.Add("x-rapidapi-host", "covid-19-tracking.p.rapidapi.com");
+                HttpRequestMessage request;
+                ExecutarRequest(countryName, out Uri, client, out request);
 
                 HttpResponseMessage responseMessage = await client.SendAsync(request);
 
@@ -58,21 +52,16 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
             }
         }
 
-        [HttpGet("DadosCovidTodos")]
-        public async Task<List<CountryDto>> DadosCovidTodos()
+        [HttpGet("NumeroCovidTodosPaises")]
+        public async Task<List<CountryDto>> NumeroCovidTodosPaises()
         {
             List<CountryDto> CountryList = new List<CountryDto>();
+            string Uri;
 
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                HttpRequestMessage request = new HttpRequestMessage();
-
-                request.RequestUri = new Uri(BaseUrl);
-                request.Method = HttpMethod.Get;
-                request.Headers.Add("x-rapidapi-key", "27a8a51e73mshb56ce7441cf679cp1cc3b1jsn492bbef14582");
-                request.Headers.Add("x-rapidapi-host", "covid-19-tracking.p.rapidapi.com");
+                HttpRequestMessage request;
+                ExecutarRequest("", out Uri, client, out request);
 
                 HttpResponseMessage responseMessage = await client.SendAsync(request);
 
@@ -84,6 +73,23 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
 
                 return CountryList;
             }
+        }
+        private void ExecutarRequest(string countryName, out string Uri, HttpClient client, out HttpRequestMessage request)
+        {
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            request = new HttpRequestMessage();
+
+            if (countryName == "")
+                Uri = BaseUrl;
+            else
+                Uri = BaseUrl + "/" + countryName;
+
+            request.RequestUri = new Uri(Uri);
+            request.Method = HttpMethod.Get;
+            request.Headers.Add("x-rapidapi-key", "27a8a51e73mshb56ce7441cf679cp1cc3b1jsn492bbef14582");
+            request.Headers.Add("x-rapidapi-host", "covid-19-tracking.p.rapidapi.com");
         }
 
         [HttpGet("DadosCovidPaisesEspecificos")]
@@ -102,7 +108,7 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
             
             foreach (string item in lista)
             {
-                CountryList.Add(DadosCovidPais(item).Result);
+                CountryList.Add(NumeroCovidPorPais(item).Result);
             }
 
             return CountryList;
@@ -111,7 +117,8 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
         [HttpPost("SalvarDados")]
         public async Task<IActionResult> Create()
         {
-            List<CountryDto> listCountryDto = await DadosCovidTodos();
+            Country country;
+            List<CountryDto> listCountryDto = await NumeroCovidTodosPaises();
             
             if (listCountryDto.Count == 0)
                 return BadRequest("Nenhum registro encontrado.");
@@ -135,7 +142,7 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
                     item.TotalDeaths = string.IsNullOrWhiteSpace(item.TotalDeaths) ? "0" : item.TotalDeaths.Replace(",", "");
                     item.TotalRecovered = string.IsNullOrWhiteSpace(item.TotalRecovered) ? "0" : item.TotalRecovered.Replace(",", "");
 
-                    var country = _map.Map<Country>(item);
+                    country = _map.Map<Country>(item);
                     _ctt.Countries.Add(country);
                     _ctt.SaveChanges();
                 }
@@ -179,24 +186,23 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
             Country country = _ctt.Countries.FirstOrDefault(x => x.CountryName == countryName);
             
             if (country == null)
-                return NotFound();
-
-            CountryDto countryDto = new CountryDto()
-            {
-                ActiveCases = activeCases,
-                CountryName = countryName,
-                LastUpdate = lastUpdate.ToString(),
-                NewCases = newCases,
-                NewDeaths = newDeaths,
-                TotalCases = totalCases,
-                TotalDeaths = totalDeaths,
-                TotalRecovered = totalRecovered
-            };
-
-            country = _map.Map(countryDto, country);
+                return BadRequest("Nenhum registro encontrado para atualização dos dados do país.");
 
             try
             {
+                CountryDto countryDto = new CountryDto()
+                {
+                    ActiveCases = activeCases,
+                    CountryName = countryName,
+                    LastUpdate = lastUpdate.ToString(),
+                    NewCases = newCases,
+                    NewDeaths = newDeaths,
+                    TotalCases = totalCases,
+                    TotalDeaths = totalDeaths,
+                    TotalRecovered = totalRecovered
+                };
+
+                country = _map.Map(countryDto, country);
                 await _ctt.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -221,10 +227,8 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
             Country country = _ctt.Countries.FirstOrDefault(x => x.CountryName == countryName);
 
             if (country == null)
-            {
-                return NotFound();
-            }
-           
+                return BadRequest("Nenhum registro encontrado para exclusão lógica do país.");
+
             try
             {
                 country.IsDeleted = true;
@@ -248,20 +252,20 @@ namespace BoxTI.Challenge.CovidTracking.API.Controllers
         [HttpGet("OrdenarPaises")]
         public object GetPaisesOrdenados()
         {
-            var countries = _ctt.Countries
-                            .OrderByDescending(x => x.ActiveCases).ToList();
-
-            //var query = from c in countries
-            //                select new
-            //                {
-            //                    ActiveCases = c.ActiveCases,
-            //                    Countries = c.CountryName
-            //                    .Skip(1)
-            //                .Zip(_ctt.Countries, (n1, n0) => n1.ActiveCases - n0.ActiveCases);
-            //}
-                            
-
+            var countries = _ctt.Countries.OrderByDescending(x => x.ActiveCases).ToList();
             return countries;
+        }
+
+        [HttpPost("GerarCSV")]
+        public IActionResult GerarCSV([Required] string countryName,
+                                      [Required] string path)
+        {
+            List<CountryDto> dados = ListarDadosPaisEspecifico(countryName);
+
+            CountryService countryService = new CountryService();
+            countryService.ExportarCSV(dados, path);
+
+            return Ok();
         }
     }
 }

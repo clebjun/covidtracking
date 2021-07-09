@@ -1,4 +1,4 @@
-﻿                                                                                                                                                                                                    using AutoMapper;
+﻿                                                                                                                                                                                                  using AutoMapper;
 using System;
 using BoxTI.Challenge.CovidTracking.API.Models;
 using BoxTI.Challenge.CovidTracking.API.Models.Dto;
