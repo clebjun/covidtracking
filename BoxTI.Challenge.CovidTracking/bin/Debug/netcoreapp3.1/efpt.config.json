@@ -1,0 +1,36 @@
+﻿{
+   "CodeGenerationMode": 0,
+   "ContextClassName": "Db_Context",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": "Models",
+   "OutputPath": "Models",
+   "ProjectRootNamespace": "BoxTI.Challenge.CovidTracking.API",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[Country]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "STFSAON005118-L\\SQLEXPRESS.db_box",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseNoConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false
+}
